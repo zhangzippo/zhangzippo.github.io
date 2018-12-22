@@ -16,7 +16,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "./deploy.sh"
+      "pre-commit": " sh ./deploy.sh"
     }
   },
   "author": "",
