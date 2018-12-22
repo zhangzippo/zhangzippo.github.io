@@ -14,11 +14,6 @@
     "docs:dev": "vuepress dev",
     "docs:build": "vuepress build"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": " sh ./deploy.sh"
-    }
-  },
   "author": "",
   "license": "ISC"
 }
