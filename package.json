@@ -11,8 +11,8 @@
     "husky": "^1.2.1"
   },
   "scripts": {
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:dev": "vuepress dev",
+    "docs:build": "vuepress build"
   },
   "husky": {
     "hooks": {
