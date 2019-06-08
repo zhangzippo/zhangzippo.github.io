@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>理解BFC | 一个懒癌程序员</title>
+    <meta name="description" content="个人博客">
+    <link rel="preload" href="/assets/css/0.styles.ee130694.css" as="style"><link rel="preload" href="/assets/js/app.7e97c462.js" as="script"><link rel="preload" href="/assets/js/3.e09623a1.js" as="script"><link rel="preload" href="/assets/js/18.c4f66566.js" as="script"><link rel="prefetch" href="/assets/js/1.bd67648d.js"><link rel="prefetch" href="/assets/js/10.ec08d35b.js"><link rel="prefetch" href="/assets/js/11.0b2886a7.js"><link rel="prefetch" href="/assets/js/12.ef565c30.js"><link rel="prefetch" href="/assets/js/13.088e05a8.js"><link rel="prefetch" href="/assets/js/14.7c0fc580.js"><link rel="prefetch" href="/assets/js/15.401e9bdd.js"><link rel="prefetch" href="/assets/js/16.ace1457a.js"><link rel="prefetch" href="/assets/js/17.cbae5716.js"><link rel="prefetch" href="/assets/js/19.d97c7382.js"><link rel="prefetch" href="/assets/js/20.76f17c7e.js"><link rel="prefetch" href="/assets/js/21.018a5c73.js"><link rel="prefetch" href="/assets/js/22.0e10abd4.js"><link rel="prefetch" href="/assets/js/4.291d3ee6.js"><link rel="prefetch" href="/assets/js/5.198fd333.js"><link rel="prefetch" href="/assets/js/6.8784562a.js"><link rel="prefetch" href="/assets/js/7.bb9cc2dd.js"><link rel="prefetch" href="/assets/js/8.32f56d74.js"><link rel="prefetch" href="/assets/js/9.adff833f.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.ee130694.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div id="vuepress-theme-meteorlxy"><header class="header" style="background-size:cover;background-repeat:no-repeat;background-position:center;background-attachment:scroll;background-image:url(/img/background.jpg);" data-v-0539f1bd><div data-v-39c72c19 data-v-0539f1bd><nav class="navbar" data-v-39c72c19><div class="container" data-v-39c72c19><a href="/" class="router-link-active" data-v-39c72c19><span class="navbar-site-name" data-v-39c72c19>
+          一个懒癌程序员
+        </span></a> <div class="navbar-toggler" data-v-39c72c19><svg class="icon" style="fill:null;font-size:1.2em;" data-v-39c72c19 data-v-39c72c19><title data-v-39c72c19 data-v-39c72c19>menu</title><use xlink:href="#icon-menu" data-v-39c72c19 data-v-39c72c19></use></svg></div> <div class="navbar-links" data-v-39c72c19><a href="/" class="navbar-link" data-v-39c72c19>
+            首页
+          </a><a href="/posts/" class="navbar-link router-link-active" data-v-39c72c19>
+            文章
+          </a><a href="/life/" class="navbar-link" data-v-39c72c19>
+            生活
+          </a><a href="https://github.com/zhangzippo" target="_blank" rel="noopener noreferrer" class="navbar-link" data-v-39c72c19>
+            github
+          </a></div></div></nav> <div class="navbar-holder" style="display:none;" data-v-39c72c19></div></div> <div class="banner" data-v-98d6aa8c data-v-0539f1bd data-v-0539f1bd><div class="container" data-v-98d6aa8c><div class="center" data-v-98d6aa8c><h1 data-v-98d6aa8c data-v-0539f1bd>
+          理解BFC
+        </h1></div></div></div></header> <div class="container clearfix show-aside" data-v-6cd81e6a data-v-6cd81e6a><main class="main" data-v-6cd81e6a><div class="post" data-v-6cd81e6a data-v-6cd81e6a><section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><span class="create-date" data-v-4e23451f>
+      发布时间 : 2019-04-28
+    </span> <span class="update-date" data-v-4e23451f>
+      最后修改 : 2019-05-03
+    </span></section> <section class="post-links" data-v-4e23451f><a href="/posts/2019/04/25/_25puppteererror.html" class="post-link" data-v-4e23451f>
+      上一篇 : puppeteer填坑指南
+    </a> <a href="/posts/2019/05/12/_10mutilpage.html" class="post-link" data-v-4e23451f>
+      下一篇 : webpack4 + vue多页面项目精细构建思路
+    </a></section></section> <article class="main-div"><div class="content default"><h1 id="理解bfc"><a href="#理解bfc" aria-hidden="true" class="header-anchor">#</a> 理解BFC</h1> <p>BFC(格式化上下文)在整个css体系中是比较重要的概念，也牵扯了很多其他问题比如如浮动、定位、盒模型等，这篇文章主要帮助理解bfc的概念，特性和应用场景。</p> <h2 id="概念"><a href="#概念" aria-hidden="true" class="header-anchor">#</a> 概念</h2> <p>先看一段来自MDN的定义：</p> <blockquote><p>块格式化上下文（Block Formatting Context，BFC） 是Web页面的可视化CSS渲染的一部分，是<em>块盒子</em>的布局过程发生的区域，也是浮动元素与其他元素交互的区域。</p></blockquote> <p>嗯，非常严谨且官方（就是看不懂）那么我尝试用一种便于理解的方式来解释这个BFC，你可以简单的理解BFC就是页面上的一块儿区域，这个区域有一些特性，并且该区域内部有一套自己的规则不对外界元素产生干扰，是一块相对独立的渲染区域。（注意，参与BFC的是块盒子）</p> <p>参考其他博客中我认为最贴切的解释：
+块格式上下文是页面CSS 视觉渲染的一部分，用于决定块盒子的布局及浮动相互影响范围的一个区域。</p> <p>产生这块区域需要满足以下几种条件：</p> <blockquote><ul><li><em><strong>根元素或包含根元素的元素</strong></em></li> <li><em><strong>浮动元素（元素的 <code>float</code> 不是 <code>none</code>）</strong></em></li> <li><em><strong>绝对定位元素（元素的 <code>position</code>为 <code>absolute</code> 或 <code>fixed</code>）</strong></em></li> <li><em><strong>行内块元素（元素的 <code>display</code>为 <code>inline-block</code>）</strong></em></li> <li><em><strong><code>overflow</code> 值不为 <code>visible</code> 的块元素</strong></em></li> <li><em><strong><code>display</code> 值为 <code>flow-root</code> 的元素</strong></em></li> <li>表格单元格（元素的 <code>display</code>为 <code>table-cell</code>，HTML表格单元格默认为该值）</li> <li>表格标题（元素的 <code>display</code> 为 <code>table-caption</code>，HTML表格标题默认为该值）</li> <li>匿名表格单元格元素（元素的 <code>display</code>为 <code>table</code>、<code>table-row</code>、 <code>table-row-group</code>、<code>table-header-group</code>、<code>table-footer-group</code>（分别是HTML table、row、tbody、thead、tfoot的默认属性）或 <code>inline-table</code>）</li> <li><code>contain</code>值为 <code>layout</code>、<code>content</code>或 <code>strict</code> 的元素</li> <li>弹性元素（<code>display</code>为 <code>flex</code> 或 <code>inline-flex</code>元素的直接子元素）</li> <li>网格元素（<code>display</code>为 <code>grid</code> 或 <code>inline-grid</code> 元素的直接子元素）</li> <li>多列容器（元素的 <code>column-count</code>不为 <code>auto</code>，包括 <code>column-count</code> 为 <code>1</code>）</li> <li><code>column-span</code> 为 <code>all</code> 的元素始终会创建一个新的BFC，即使该元素没有包裹在一个多列容器中。</li></ul></blockquote> <p>可以看出有很多触发BFC区域的条件，其中前几个斜粗体的描述是我们经常遇到也需要重点记住的，后面的几种可以当作扩展了解就好。</p> <p>这里重点说一下display:flow-root,display:flow-root是什么意思呢？它可以创建无副作用的BFC。在父级块中使用 display: flow-root 可以创建新的BFC。我们刚才分析了上面几种创造bfc的方式，但他们都是有副作用的(比如float会让元素脱离文档流靠左或靠右，position的绝对定位也会脱离文档流，overflow的值也会造成一些额外的影响)，而这个值的设定是单纯创造一个BFC,没有任何其他影响，但是这个属性目前浏览器支持的不是很好，下图是这个值的兼容情况：
+<img src="https://upload-images.jianshu.io/upload_images/12504052-97fd4afb5f490736.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="display: flow-root兼容情况"></p> <h2 id="影响的范围"><a href="#影响的范围" aria-hidden="true" class="header-anchor">#</a> 影响的范围</h2> <p>这里引用MDN的解释：</p> <blockquote><p>块格式化上下文包含创建它的元素内部的所有内容,但不包括创建了新BFC的子元素的内部元素。
+块格式化上下文对浮动定位与清除浮动都很重要。浮动定位和清除浮动时只会应用于同一个BFC内的元素。浮动不会影响其它BFC中元素的布局，而清除浮动只能清除同一BFC中在它前面的元素的浮动。外边距折叠也只会发生在属于同一BFC的块级元素之间。
+这段话的重点在于1:BFC将影响内部包含的所有内容，除非内部创建了新的子BFC区域；2:所有的BFC影响只会发生在同级次的BFC区域中。</p></blockquote> <p>如下面的代码，box创建了一个BFC区域，那么将影响son_1,son_1-1,son_2,由于son_自己创建了一个BFC区域，因此son_2-1将不受box的BFC影响，而只受son_2的BFC影响</p> <div class="language-html extra-class"><pre class="language-html"><code><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">'</span>box<span class="token punctuation">'</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">'</span>BFC<span class="token punctuation">'</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">'</span>son_1<span class="token punctuation">'</span></span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">'</span>son_1-1<span class="token punctuation">'</span></span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">'</span>son_2<span class="token punctuation">'</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">'</span>BFC<span class="token punctuation">'</span></span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">'</span>son_2-1<span class="token punctuation">'</span></span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+</code></pre></div><p>从下图我门可以看到，外层盒子创造了一块儿BFC区域会清除浮动，第一层因为浮动的关系撑开了外层盒子，由于float:left创造了一块儿新的BFC区域，因此它的子元素的float不会撑开最外层，因此没有受到最外层BFC的影响（没有撑开第二层因为第二层给了固定高度）。这更佳说明了BFC是一块独立区域，并且内部不会影响BFC外部元素的特性。
+<img src="https://upload-images.jianshu.io/upload_images/12504052-8fba12f7b70a767c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="BFC的影响范围"></p> <h2 id="特性"><a href="#特性" aria-hidden="true" class="header-anchor">#</a> 特性</h2> <p>关于以下特性介绍在css2.1规范的文档中（文章结尾文献）有相关介绍，这里前几条是翻译过来讲，后面几条是来自其他文章的总结。</p> <blockquote><p>特性1：在BFC中，内部块（block块级元素）从顶部开始依次垂直排列。两个同级块之间的垂直距离由“Margin”属性确定。</p></blockquote> <p>这个特性没什么说的，就是在BFC区域内部的子块级元素会垂直排列，这点即使不在BFC内其实也是一样的，多个div会在容器内部垂直的一个一个排列。</p> <blockquote><p>特性2: 内部块垂直方向的距离由margin决定。属于同一个BFC的两个相邻Box的margin会发生重叠。</p></blockquote> <p>这个特性是指相邻的两个子块元素的相隔距离由margin决定，但并不是margin的和，而是会重叠（实际就是是margin之间的最大值），如下代码：</p> <div class="language-html extra-class"><pre class="language-html"><code><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>box<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>son<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span>
+        I am one
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>son<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span>
+        I am two
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>son<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span>
+        I am three
+     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>style</span><span class="token punctuation">&gt;</span></span><span class="token style language-css">
+<span class="token selector">.box</span> <span class="token punctuation">{</span>
+  <span class="token property">background-color</span><span class="token punctuation">:</span> <span class="token function">rgb</span><span class="token punctuation">(</span>224, 206, 247<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token property">display</span><span class="token punctuation">:</span>flow-root<span class="token punctuation">;</span> // 创造一个BFC区域
+  <span class="token property">width</span><span class="token punctuation">:</span>100%<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token selector">.son</span> <span class="token punctuation">{</span>
+  <span class="token property">width</span><span class="token punctuation">:</span> 200px<span class="token punctuation">;</span>
+  <span class="token property">height</span><span class="token punctuation">:</span> 150px<span class="token punctuation">;</span>
+  <span class="token property">background-color</span><span class="token punctuation">:</span> white<span class="token punctuation">;</span>
+  <span class="token property">border</span><span class="token punctuation">:</span> 1px solid black<span class="token punctuation">;</span>
+  <span class="token property">padding</span><span class="token punctuation">:</span> 10px<span class="token punctuation">;</span>
+  <span class="token property">margin</span><span class="token punctuation">:</span>10px 0<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token selector">.son:last-child</span><span class="token punctuation">{</span>
+<span class="token property">margin</span><span class="token punctuation">:</span>20px 0<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">&gt;</span></span>
+</code></pre></div><p>效果如下：
+<img src="https://upload-images.jianshu.io/upload_images/12504052-2ad53f9f798171dd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p> <p>可以看到每个元素之间的margin是10像素，而最后一个box与上方的box之间是20，因为margin的重叠导致了取的是两个相邻box的最大值。</p> <blockquote><p>特性3：每个子块元素的左外边缘接触包含块的左边缘（对于从右到左的格式，右边缘接触）。即使在存在浮动的情况下也是如此。</p></blockquote> <p>这里解释一下，我们知道每一个box模型是由四个层级构成的，如图：
+<img src="https://upload-images.jianshu.io/upload_images/12504052-faecf44f487d0062.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png">
+从外到内分别是margin-box，border-box，padding-box和content-box，这个规则的意思就是说我们的子块的外边缘（也就是margin-box边缘）会与BFC区域的边缘（也就是content-box的边缘），即使在子块存在浮动的情况下也是一样的。</p> <div class="language-html extra-class"><pre class="language-html"><code>.box {
+  background-color: rgb(224, 206, 247);
+  border: 5px solid rebeccapurple;
+  display:flow-root;
+padding: 10px;
+}
+.float {
+  float:left; // 添加浮动
+  width: 200px;
+  height: 150px;
+  background-color: white;
+  border: 1px solid black;
+  margin:0 10px;
+}
+</code></pre></div><p>内部元素有一个10像素的margin,外部盒子有10像素的padding，内部元素的margin-box的左边与包含块content-box的做边缘接触
+<img src="https://upload-images.jianshu.io/upload_images/12504052-2f0f259c42981130.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="特性3"></p> <blockquote><p>特性4：BFC就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素，反之亦然；
+这点在上面我们介绍影响范围的时候介绍过，不再做过多说明了。</p></blockquote> <blockquote><p>特性5：计算BFC的高度时，考虑BFC所包含的所有元素，连浮动元素也参与计算
+这个特性就是为何子元素浮动，如果要清除浮动可以在父元素上创造一个bfc的解释，这样高度就囊括了浮动元素。
+特性6：浮动盒区域不叠加到BFC上</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>&lt;div class=&quot;box&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;float&quot;&gt;&lt;/div&gt;
+&lt;style&gt;
+  .box { 
+    background-color: rgb(224, 206, 247); 
+    border: 5px solid rebeccapurple;
+    height:100px; 
+    width:100px;
+    padding:10px; display:flow-root; 
+  }
+  .float { 
+    float:left;
+    height: 150px;
+    background-color: white; 
+    border: 1px solid black; 
+    padding: 10px; 
+  } 
+&lt;/style&gt;
+可以看到浮动元素没有覆盖到bfc上面
+</code></pre></div><p><img src="https://upload-images.jianshu.io/upload_images/12504052-86669c48459b977b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="浮动盒区域不叠加到BFC上"></p> <h2 id="应用"><a href="#应用" aria-hidden="true" class="header-anchor">#</a> 应用</h2> <p><strong>1. 分属于不同的BFC时可以阻止margin重叠</strong>
+根据特性2我们知道，BFC内的元素排列时margin会重叠，因此我们为了防止重叠，可以使两个元素创建自己的bfc，这样margin就不会重叠。
+<strong>2. 可以包含浮动元素——清除内部浮动</strong>
+根据特性五可以得知。
+<strong>3. 可以阻止元素被浮动元素覆盖</strong>
+根据特性六，只需要将被覆盖的元素创建成为BFC就可以解决这个问题。
+<strong>4. 自适应两栏布局</strong>
+我们可以利用bfc的特性来构造两栏布局：</p> <div class="language- extra-class"><pre class="language-text"><code>&lt;div class=&quot;left&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;right&quot;&gt;&lt;/div&gt;
+&lt;style&gt;
+  .left{
+background:yellow;
+width:200px;
+height:400px;
+float:left;
+}
+.right{
+background:pink;
+height:400px;
+/*添加overflow:hidden，触发元素BFC*/
+overflow:hidden;
+}
+&lt;/style&gt;
+</code></pre></div><p><img src="https://upload-images.jianshu.io/upload_images/12504052-13b745a03f28389c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="右侧自适应两栏布局">
+当然我们也可以利用该特性进行3栏的布局，道理都是一样的。</p> <p>这篇文章对BFC的前置概念没有过多说明，比如盒模型以及定位方案等，可以查看<a href="https://juejin.im/post/59b73d5bf265da064618731d" target="_blank" rel="noopener noreferrer">https://juejin.im/post/59b73d5bf265da064618731d<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a>这篇文章，本篇文章也部分参考了该文章。</p> <h2 id="参考文献"><a href="#参考文献" aria-hidden="true" class="header-anchor">#</a> 参考文献</h2> <p><a href="https://developer.mozilla.org/zh-CN/docs/Web/Guide/CSS/Block_formatting_context" target="_blank" rel="noopener noreferrer">https://developer.mozilla.org/zh-CN/docs/Web/Guide/CSS/Block_formatting_context<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> <a href="https://www.w3.org/TR/CSS21/visuren.html#block-formatting" target="_blank" rel="noopener noreferrer">https://www.w3.org/TR/CSS21/visuren.html#block-formatting<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> <a href="https://juejin.im/post/59b73d5bf265da064618731d" target="_blank" rel="noopener noreferrer">https://juejin.im/post/59b73d5bf265da064618731d<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p></div></article> <section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><span class="create-date" data-v-4e23451f>
+      发布时间 : 2019-04-28
+    </span> <span class="update-date" data-v-4e23451f>
+      最后修改 : 2019-05-03
+    </span></section> <section class="post-links" data-v-4e23451f><a href="/posts/2019/04/25/_25puppteererror.html" class="post-link" data-v-4e23451f>
+      上一篇 : puppeteer填坑指南
+    </a> <a href="/posts/2019/05/12/_10mutilpage.html" class="post-link" data-v-4e23451f>
+      下一篇 : webpack4 + vue多页面项目精细构建思路
+    </a></section></section> <div id="post-comments" class="main-div"><!----></div></div></main> <aside class="aside" data-v-6cd81e6a><div class="info-card main-div" data-v-3da8ff8d data-v-6cd81e6a><div class="info-card-header" style="background-image:null;" data-v-3da8ff8d><img src="/img/avatar.jpeg" alt="zippo" class="info-avatar" data-v-3da8ff8d></div> <div class="info-card-body" data-v-3da8ff8d><section class="info-nickname" data-v-3da8ff8d>
+      zippo
+    </section> <section class="info-desc" data-v-3da8ff8d>the more you want<br/>the less you got</section> <section class="info-contact" data-v-3da8ff8d><section data-v-3da8ff8d><span title="beijing City, China" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>beijing City, China</title><use xlink:href="#icon-location" data-v-3da8ff8d data-v-3da8ff8d></use></svg><span class="info-text" data-v-3da8ff8d data-v-3da8ff8d>
+          beijing City, China
+        </span></span></section> <!----> <section data-v-3da8ff8d><a href="mailto:zhangzhp3@163.com" title="zhangzhp3@163.com" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>zhangzhp3@163.com</title><use xlink:href="#icon-email" data-v-3da8ff8d data-v-3da8ff8d></use></svg><span class="info-text" data-v-3da8ff8d data-v-3da8ff8d>
+          zhangzhp3@163.com
+        </span></a></section></section></div> <div class="info-card-footer" data-v-3da8ff8d><section class="info-sns clearfix" data-v-3da8ff8d><a href="https://github.com/zhangZippo" target="_blank" class="sns-link" data-v-3da8ff8d><span title="GitHub: meteorlxy" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>GitHub: meteorlxy</title><use xlink:href="#icon-github" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a><a href="https://www.zhihu.com/people/kevin-51-3/activities" target="_blank" class="sns-link" data-v-3da8ff8d><span title="知乎: zippo" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>知乎: zippo</title><use xlink:href="#icon-zhihu" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a><a href="https://www.jianshu.com/u/2c78bea25c85" target="_blank" class="sns-link" data-v-3da8ff8d><span title="新浪微博: zippo" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>新浪微博: zippo</title><use xlink:href="#icon-weibo" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a></section></div></div> <div class="post-nav-card main-div" style="position:relative;top:0;width:0px;" data-v-6cd81e6a><div class="post-nav-contents"><svg class="icon" style="fill:null;font-size:null;"><title>book</title><use xlink:href="#icon-book"></use></svg> <span>文章目录</span> <div class="post-nav-toc"> <ul><li><a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html#概念">概念</a> <!----></li><li><a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html#影响的范围">影响的范围</a> <!----></li><li><a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html#特性">特性</a> <!----></li><li><a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html#应用">应用</a> <!----></li><li><a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html#参考文献">参考文献</a> <!----></li></ul> </div></div> <div class="post-nav-comments"><svg class="icon" style="fill:null;font-size:null;"><title>comment</title><use xlink:href="#icon-comment"></use></svg> <a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html#post-comments">
+      评论
+    </a></div></div></aside></div> <footer class="footer" data-v-1114308c><p class="sns-links" data-v-1114308c><a href="https://github.com/zhangZippo" target="_blank" class="sns-link" data-v-1114308c><span title="GitHub: meteorlxy" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>GitHub: meteorlxy</title><use xlink:href="#icon-github" data-v-1114308c data-v-1114308c></use></svg></span></a><a href="https://www.zhihu.com/people/kevin-51-3/activities" target="_blank" class="sns-link" data-v-1114308c><span title="知乎: zippo" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>知乎: zippo</title><use xlink:href="#icon-zhihu" data-v-1114308c data-v-1114308c></use></svg></span></a><a href="https://www.jianshu.com/u/2c78bea25c85" target="_blank" class="sns-link" data-v-1114308c><span title="新浪微博: zippo" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>新浪微博: zippo</title><use xlink:href="#icon-weibo" data-v-1114308c data-v-1114308c></use></svg></span></a></p> <p data-v-1114308c><span data-v-1114308c>Powered by </span> <a href="https://vuepress.vuejs.org" target="_blank" data-v-1114308c>
+      Vuepress
+    </a></p></footer></div><div class="global-ui"><!----><!----></div></div>
+    <script src="/assets/js/app.7e97c462.js" defer></script><script src="/assets/js/3.e09623a1.js" defer></script><script src="/assets/js/18.c4f66566.js" defer></script>
+  </body>
+</html>

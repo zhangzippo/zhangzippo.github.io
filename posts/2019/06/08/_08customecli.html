@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>写一个基于webpack的cli | 一个懒癌程序员</title>
+    <meta name="description" content="个人博客">
+    <link rel="preload" href="/assets/css/0.styles.ee130694.css" as="style"><link rel="preload" href="/assets/js/app.7e97c462.js" as="script"><link rel="preload" href="/assets/js/3.e09623a1.js" as="script"><link rel="preload" href="/assets/js/20.76f17c7e.js" as="script"><link rel="prefetch" href="/assets/js/1.bd67648d.js"><link rel="prefetch" href="/assets/js/10.ec08d35b.js"><link rel="prefetch" href="/assets/js/11.0b2886a7.js"><link rel="prefetch" href="/assets/js/12.ef565c30.js"><link rel="prefetch" href="/assets/js/13.088e05a8.js"><link rel="prefetch" href="/assets/js/14.7c0fc580.js"><link rel="prefetch" href="/assets/js/15.401e9bdd.js"><link rel="prefetch" href="/assets/js/16.ace1457a.js"><link rel="prefetch" href="/assets/js/17.cbae5716.js"><link rel="prefetch" href="/assets/js/18.c4f66566.js"><link rel="prefetch" href="/assets/js/19.d97c7382.js"><link rel="prefetch" href="/assets/js/21.018a5c73.js"><link rel="prefetch" href="/assets/js/22.0e10abd4.js"><link rel="prefetch" href="/assets/js/4.291d3ee6.js"><link rel="prefetch" href="/assets/js/5.198fd333.js"><link rel="prefetch" href="/assets/js/6.8784562a.js"><link rel="prefetch" href="/assets/js/7.bb9cc2dd.js"><link rel="prefetch" href="/assets/js/8.32f56d74.js"><link rel="prefetch" href="/assets/js/9.adff833f.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.ee130694.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div id="vuepress-theme-meteorlxy"><header class="header" style="background-size:cover;background-repeat:no-repeat;background-position:center;background-attachment:scroll;background-image:url(/img/background.jpg);" data-v-0539f1bd><div data-v-39c72c19 data-v-0539f1bd><nav class="navbar" data-v-39c72c19><div class="container" data-v-39c72c19><a href="/" class="router-link-active" data-v-39c72c19><span class="navbar-site-name" data-v-39c72c19>
+          一个懒癌程序员
+        </span></a> <div class="navbar-toggler" data-v-39c72c19><svg class="icon" style="fill:null;font-size:1.2em;" data-v-39c72c19 data-v-39c72c19><title data-v-39c72c19 data-v-39c72c19>menu</title><use xlink:href="#icon-menu" data-v-39c72c19 data-v-39c72c19></use></svg></div> <div class="navbar-links" data-v-39c72c19><a href="/" class="navbar-link" data-v-39c72c19>
+            首页
+          </a><a href="/posts/" class="navbar-link router-link-active" data-v-39c72c19>
+            文章
+          </a><a href="/life/" class="navbar-link" data-v-39c72c19>
+            生活
+          </a><a href="https://github.com/zhangzippo" target="_blank" rel="noopener noreferrer" class="navbar-link" data-v-39c72c19>
+            github
+          </a></div></div></nav> <div class="navbar-holder" style="display:none;" data-v-39c72c19></div></div> <div class="banner" data-v-98d6aa8c data-v-0539f1bd data-v-0539f1bd><div class="container" data-v-98d6aa8c><div class="center" data-v-98d6aa8c><h1 data-v-98d6aa8c data-v-0539f1bd>
+          写一个基于webpack的cli
+        </h1></div></div></div></header> <div class="container clearfix show-aside" data-v-6cd81e6a data-v-6cd81e6a><main class="main" data-v-6cd81e6a><div class="post" data-v-6cd81e6a data-v-6cd81e6a><section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><span class="create-date" data-v-4e23451f>
+      发布时间 : 2019-06-08
+    </span> <span class="update-date" data-v-4e23451f>
+      最后修改 : 2019-06-08
+    </span></section> <section class="post-links" data-v-4e23451f><a href="/posts/2019/05/12/_10mutilpage.html" class="post-link" data-v-4e23451f>
+      上一篇 : webpack4 + vue多页面项目精细构建思路
+    </a> <!----></section></section> <article class="main-div"><div class="content default"><h1 id="写一个基于webpack的cli"><a href="#写一个基于webpack的cli" aria-hidden="true" class="header-anchor">#</a> 写一个基于webpack的cli</h1> <h2 id="前言"><a href="#前言" aria-hidden="true" class="header-anchor">#</a> 前言</h2> <p>我们经常接触到各种各样的前端脚手架和cli工具，像vue-cli就是一款基于webpack的cli工具，我们有时候也有针对自己个性化项目快速构建的需求，这时候我们可以自己写一个cli工具。</p> <h2 id="准备"><a href="#准备" aria-hidden="true" class="header-anchor">#</a> 准备</h2> <p>这里我们介绍基于webpack去写一个cli工具，从前往后讲，我们写一个cli,首先要先定义命令，通过命令触发webpack的构建流程。那么我们基本上需要以下几个工具包：</p> <blockquote><p>commander：命令行接口的完整解决方案,可以方便的创建自定义命令行
+inquirer：用于创建可交互的命令行
+webpack4: 构建的基础
+有了以上几个核心工具包之后我们就可以开始编写我们的cli工具了</p></blockquote> <h2 id="开始"><a href="#开始" aria-hidden="true" class="header-anchor">#</a> 开始</h2> <p>先看一下我们的工作目录：</p> <div class="language- extra-class"><pre class="language-text"><code>├── bin   --定义自定义命令
+├── src
+│   ├── build   -- 构建流程
+│   ├── develop  -- 开发流程
+│   ├── produce
+│   └── utils
+└── webpack  --webpack配置文件
+</code></pre></div><h3 id="配置命令"><a href="#配置命令" aria-hidden="true" class="header-anchor">#</a> 配置命令</h3> <p>打开package.json,创建bin字段，为我们的命令起一个名字(例如block)，执行文件指向我们的bin目录。</p> <div class="language- extra-class"><pre class="language-text"><code>&quot;bin&quot;: {
+    &quot;block&quot;: &quot;./bin/block-cli.js&quot;
+  },
+</code></pre></div><p>这意味着我们的命令是以block开头的，例如block build,block init 等等。然后我们进行block-cli.js的编写，注意这个文件的开头一定要有#!/usr/bin/env node，关于这行的作用大家就自行百度吧。这里我们需要引入commander这个工具包了。这里简单介绍一下commander工具的用法：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code>#<span class="token operator">!</span><span class="token operator">/</span>usr<span class="token operator">/</span>bin<span class="token operator">/</span>env node
+<span class="token keyword">const</span> program <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'commander'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">/**
+ * project init
+ */</span>
+program
+  <span class="token punctuation">.</span><span class="token function">command</span><span class="token punctuation">(</span><span class="token string">'init'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">description</span><span class="token punctuation">(</span><span class="token string">'project init'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">action</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">/**
+ * create modules and pages
+ */</span>
+program
+  <span class="token punctuation">.</span><span class="token function">command</span><span class="token punctuation">(</span><span class="token string">'create &lt;paths...&gt;'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">description</span><span class="token punctuation">(</span><span class="token string">'create module‘s or page’s path'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">action</span><span class="token punctuation">(</span><span class="token punctuation">(</span>paths<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">createTemplete</span><span class="token punctuation">(</span>paths<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">/**
+ * build progress
+ */</span>
+program
+  <span class="token punctuation">.</span><span class="token function">command</span><span class="token punctuation">(</span><span class="token string">'build'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span><span class="token string">'-m, --module [module]'</span><span class="token punctuation">,</span> <span class="token string">'Specified the build module'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span><span class="token string">'-p, --page [page]'</span><span class="token punctuation">,</span> <span class="token string">'Specified the build page'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">description</span><span class="token punctuation">(</span><span class="token string">'build the project'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">action</span><span class="token punctuation">(</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span> <span class="token operator">=</span> <span class="token string">'production'</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> build <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'../lib/build/build'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">build</span><span class="token punctuation">(</span>options<span class="token punctuation">.</span>module<span class="token punctuation">,</span> options<span class="token punctuation">.</span>page<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+program<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>process<span class="token punctuation">.</span>argv<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div><p>我们主要使用到3个方法，option,command,action, 这里分别介绍一下，option为我们创建命令的相关参数，例如commander会为我们创建一个默认的选项--help，例如我们可以执行block --help,这时控制台会输出我们定义的所有命令以及选项参数的帮助信息，如下：</p> <div class="language- extra-class"><pre class="language-text"><code>$ block --help 
+Options:
+  -V, --version                  output the version number
+  -conf, --config &lt;config-name&gt;  output the info of target config
+  -h, --help                     output usage information
+Commands:
+  init                           project init
+  create &lt;paths...&gt;              create module‘s or page’s path
+</code></pre></div><p>如果我们想自定义帮助信息的输出，我们可以这样做(当调用--help时会触发--help事件执行这个回调)：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code>program<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">'--help'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`\r\nRun </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>chalk<span class="token punctuation">.</span><span class="token function">greenBright</span><span class="token punctuation">(</span><span class="token string">'block &lt;command&gt; --help'</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> for detailed usage of given command.`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div><p>下面来看第一行第一行我们调用command('init')，我们就创建了一个init命令（block init）.description为该命令创建一个描述，这样会在帮助信息里面显示出来，action里是我们要为这个命令执行的事情，这里我们执行了一个init方法，该方法内容是创建几个固定的目录这里就不展开了。
+我们的第3个命令block build，是命令结合参数的用法，可以看到我们调用了.option方法设定了两个参数，-m和-p全称module和page，我这里的逻辑是构建特定的模块和页面。这段写法在执行的时候这样：
+block -m a -p b
+action中的options参数中包含这两个option的值，program.parse(process.argv)方法放到命令的最后，这个方法会终结命令的执行。</p> <h3 id="配置构建流程"><a href="#配置构建流程" aria-hidden="true" class="header-anchor">#</a> 配置构建流程</h3> <p>这里我们可以把我们预先定义好的webpack配置文件放到我们webpack文件中，这里就不举例子了，大家使用自己的配置文件即可。</p> <h3 id="执行构建流程"><a href="#执行构建流程" aria-hidden="true" class="header-anchor">#</a> 执行构建流程</h3> <p>既然是我们自己定义的cli工具，在使用的时候我们就不再使用webpack的cli调用方式了，比如我们正常执行构建的时候会使用命令webpack --config，在我们自己的构建工具中我们应该更优雅的采用webpack的node-api方式执行构建，例子：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">import</span> webpack <span class="token keyword">from</span> <span class="token string">'webpack'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> configuration <span class="token keyword">from</span> <span class="token string">'../../webpack/webpack.config'</span><span class="token punctuation">;</span>
+module<span class="token punctuation">.</span><span class="token function-variable function">exports</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token function">webpack</span><span class="token punctuation">(</span>configuration<span class="token punctuation">,</span> <span class="token punctuation">(</span>err<span class="token punctuation">,</span> stats<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">.</span>stack <span class="token operator">||</span> err<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>details<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">.</span>details<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+      <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>stats<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      colors<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      env<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> info <span class="token operator">=</span> stats<span class="token punctuation">.</span><span class="token function">toJson</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>stats<span class="token punctuation">.</span><span class="token function">hasErrors</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>info<span class="token punctuation">.</span>errors<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>stats<span class="token punctuation">.</span><span class="token function">hasWarnings</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">warn</span><span class="token punctuation">(</span>info<span class="token punctuation">.</span>warnings<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div><p>这里的configuration就是我们预先准备的webpack配置文件，我们调用webpack()方法将配置传入，回调里包含err和stats两个参数负责输出错误信息和我们平时看到的构建流程的信息。
+我们有时候也可能会用到webpack-dev-server，它也是提供node-api方式调用的，下面是例子：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code>
+<span class="token keyword">import</span> webpack <span class="token keyword">from</span> <span class="token string">'webpack'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> path <span class="token keyword">from</span> <span class="token string">'path'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> webpackDevServer <span class="token keyword">from</span> <span class="token string">'webpack-dev-server'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> merge <span class="token keyword">from</span> <span class="token string">'webpack-merge'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> chalk <span class="token keyword">from</span> <span class="token string">'chalk'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> getCommonConfig <span class="token keyword">from</span> <span class="token string">'../utils/getCommonConfig'</span><span class="token punctuation">;</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">(</span>modules <span class="token operator">=</span> <span class="token string">'*'</span><span class="token punctuation">,</span> pages <span class="token operator">=</span> <span class="token string">'*'</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> rootPath <span class="token operator">=</span> process<span class="token punctuation">.</span><span class="token function">cwd</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> configuration <span class="token operator">=</span> <span class="token function">merge</span><span class="token punctuation">(</span><span class="token function">getCommonConfig</span><span class="token punctuation">(</span><span class="token string">'development'</span><span class="token punctuation">,</span> modules<span class="token punctuation">,</span> pages<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span>
+    devtool<span class="token punctuation">:</span> <span class="token string">'source-map'</span><span class="token punctuation">,</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+      <span class="token keyword">new</span> <span class="token class-name">webpack<span class="token punctuation">.</span>NamedModulesPlugin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token keyword">new</span> <span class="token class-name">webpack<span class="token punctuation">.</span>HotModuleReplacementPlugin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> options <span class="token operator">=</span> <span class="token punctuation">{</span>
+    contentBase<span class="token punctuation">:</span> path<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span>rootPath<span class="token punctuation">,</span> <span class="token string">'static'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    overlay<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    open<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    hot<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    compress<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    port<span class="token punctuation">:</span> <span class="token number">8081</span><span class="token punctuation">,</span>
+    stats<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+      colors<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    host<span class="token punctuation">:</span> <span class="token string">'localhost'</span><span class="token punctuation">,</span>
+    publicPath<span class="token punctuation">:</span> <span class="token string">'/'</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+  webpackDevServer<span class="token punctuation">.</span><span class="token function">addDevServerEntrypoints</span><span class="token punctuation">(</span>configuration<span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> compiler <span class="token operator">=</span> <span class="token function">webpack</span><span class="token punctuation">(</span>configuration<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">webpackDevServer</span><span class="token punctuation">(</span>compiler<span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token number">8081</span><span class="token punctuation">,</span> <span class="token string">'localhost'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>chalk<span class="token punctuation">.</span><span class="token function">greenBright</span><span class="token punctuation">(</span><span class="token string">'block dev-server listening on port 8081'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div><p>这边为了支持hotreload我们需要调用 webpackDevServer.addDevServerEntrypoints，另外使用api的时候以往我们写在配置文件中的devserve的配置我们以这个方法的options传入，不需要再在配置文件中定义了。
+我们把执行的方法导出，在命令行定义处使用，就完成了我们自定义的cli工具的调用。</p> <h2 id="最后"><a href="#最后" aria-hidden="true" class="header-anchor">#</a> 最后</h2> <p>以上我们就完成了一个简单的cli工具的基本流程，大家可以根据自己的需要去丰富流程。</p></div></article> <section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><span class="create-date" data-v-4e23451f>
+      发布时间 : 2019-06-08
+    </span> <span class="update-date" data-v-4e23451f>
+      最后修改 : 2019-06-08
+    </span></section> <section class="post-links" data-v-4e23451f><a href="/posts/2019/05/12/_10mutilpage.html" class="post-link" data-v-4e23451f>
+      上一篇 : webpack4 + vue多页面项目精细构建思路
+    </a> <!----></section></section> <div id="post-comments" class="main-div"><!----></div></div></main> <aside class="aside" data-v-6cd81e6a><div class="info-card main-div" data-v-3da8ff8d data-v-6cd81e6a><div class="info-card-header" style="background-image:null;" data-v-3da8ff8d><img src="/img/avatar.jpeg" alt="zippo" class="info-avatar" data-v-3da8ff8d></div> <div class="info-card-body" data-v-3da8ff8d><section class="info-nickname" data-v-3da8ff8d>
+      zippo
+    </section> <section class="info-desc" data-v-3da8ff8d>the more you want<br/>the less you got</section> <section class="info-contact" data-v-3da8ff8d><section data-v-3da8ff8d><span title="beijing City, China" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>beijing City, China</title><use xlink:href="#icon-location" data-v-3da8ff8d data-v-3da8ff8d></use></svg><span class="info-text" data-v-3da8ff8d data-v-3da8ff8d>
+          beijing City, China
+        </span></span></section> <!----> <section data-v-3da8ff8d><a href="mailto:zhangzhp3@163.com" title="zhangzhp3@163.com" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>zhangzhp3@163.com</title><use xlink:href="#icon-email" data-v-3da8ff8d data-v-3da8ff8d></use></svg><span class="info-text" data-v-3da8ff8d data-v-3da8ff8d>
+          zhangzhp3@163.com
+        </span></a></section></section></div> <div class="info-card-footer" data-v-3da8ff8d><section class="info-sns clearfix" data-v-3da8ff8d><a href="https://github.com/zhangZippo" target="_blank" class="sns-link" data-v-3da8ff8d><span title="GitHub: meteorlxy" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>GitHub: meteorlxy</title><use xlink:href="#icon-github" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a><a href="https://www.zhihu.com/people/kevin-51-3/activities" target="_blank" class="sns-link" data-v-3da8ff8d><span title="知乎: zippo" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>知乎: zippo</title><use xlink:href="#icon-zhihu" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a><a href="https://www.jianshu.com/u/2c78bea25c85" target="_blank" class="sns-link" data-v-3da8ff8d><span title="新浪微博: zippo" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>新浪微博: zippo</title><use xlink:href="#icon-weibo" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a></section></div></div> <div class="post-nav-card main-div" style="position:relative;top:0;width:0px;" data-v-6cd81e6a><div class="post-nav-contents"><svg class="icon" style="fill:null;font-size:null;"><title>book</title><use xlink:href="#icon-book"></use></svg> <span>文章目录</span> <div class="post-nav-toc"> <ul><li><a href="/posts/2019/06/08/_08customecli.html#前言">前言</a> <!----></li><li><a href="/posts/2019/06/08/_08customecli.html#准备">准备</a> <!----></li><li><a href="/posts/2019/06/08/_08customecli.html#开始">开始</a> <ul><li><a href="/posts/2019/06/08/_08customecli.html#配置命令">配置命令</a> <!----></li><li><a href="/posts/2019/06/08/_08customecli.html#配置构建流程">配置构建流程</a> <!----></li><li><a href="/posts/2019/06/08/_08customecli.html#执行构建流程">执行构建流程</a> <!----></li></ul></li><li><a href="/posts/2019/06/08/_08customecli.html#最后">最后</a> <!----></li></ul> </div></div> <div class="post-nav-comments"><svg class="icon" style="fill:null;font-size:null;"><title>comment</title><use xlink:href="#icon-comment"></use></svg> <a href="/posts/2019/06/08/_08customecli.html#post-comments">
+      评论
+    </a></div></div></aside></div> <footer class="footer" data-v-1114308c><p class="sns-links" data-v-1114308c><a href="https://github.com/zhangZippo" target="_blank" class="sns-link" data-v-1114308c><span title="GitHub: meteorlxy" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>GitHub: meteorlxy</title><use xlink:href="#icon-github" data-v-1114308c data-v-1114308c></use></svg></span></a><a href="https://www.zhihu.com/people/kevin-51-3/activities" target="_blank" class="sns-link" data-v-1114308c><span title="知乎: zippo" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>知乎: zippo</title><use xlink:href="#icon-zhihu" data-v-1114308c data-v-1114308c></use></svg></span></a><a href="https://www.jianshu.com/u/2c78bea25c85" target="_blank" class="sns-link" data-v-1114308c><span title="新浪微博: zippo" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>新浪微博: zippo</title><use xlink:href="#icon-weibo" data-v-1114308c data-v-1114308c></use></svg></span></a></p> <p data-v-1114308c><span data-v-1114308c>Powered by </span> <a href="https://vuepress.vuejs.org" target="_blank" data-v-1114308c>
+      Vuepress
+    </a></p></footer></div><div class="global-ui"><!----><!----></div></div>
+    <script src="/assets/js/app.7e97c462.js" defer></script><script src="/assets/js/3.e09623a1.js" defer></script><script src="/assets/js/20.76f17c7e.js" defer></script>
+  </body>
+</html>

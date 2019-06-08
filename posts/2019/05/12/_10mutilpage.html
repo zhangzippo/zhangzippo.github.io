@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>webpack4 + vue多页面项目精细构建思路 | 一个懒癌程序员</title>
+    <meta name="description" content="个人博客">
+    <link rel="preload" href="/assets/css/0.styles.ee130694.css" as="style"><link rel="preload" href="/assets/js/app.7e97c462.js" as="script"><link rel="preload" href="/assets/js/3.e09623a1.js" as="script"><link rel="preload" href="/assets/js/19.d97c7382.js" as="script"><link rel="prefetch" href="/assets/js/1.bd67648d.js"><link rel="prefetch" href="/assets/js/10.ec08d35b.js"><link rel="prefetch" href="/assets/js/11.0b2886a7.js"><link rel="prefetch" href="/assets/js/12.ef565c30.js"><link rel="prefetch" href="/assets/js/13.088e05a8.js"><link rel="prefetch" href="/assets/js/14.7c0fc580.js"><link rel="prefetch" href="/assets/js/15.401e9bdd.js"><link rel="prefetch" href="/assets/js/16.ace1457a.js"><link rel="prefetch" href="/assets/js/17.cbae5716.js"><link rel="prefetch" href="/assets/js/18.c4f66566.js"><link rel="prefetch" href="/assets/js/20.76f17c7e.js"><link rel="prefetch" href="/assets/js/21.018a5c73.js"><link rel="prefetch" href="/assets/js/22.0e10abd4.js"><link rel="prefetch" href="/assets/js/4.291d3ee6.js"><link rel="prefetch" href="/assets/js/5.198fd333.js"><link rel="prefetch" href="/assets/js/6.8784562a.js"><link rel="prefetch" href="/assets/js/7.bb9cc2dd.js"><link rel="prefetch" href="/assets/js/8.32f56d74.js"><link rel="prefetch" href="/assets/js/9.adff833f.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.ee130694.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div id="vuepress-theme-meteorlxy"><header class="header" style="background-size:cover;background-repeat:no-repeat;background-position:center;background-attachment:scroll;background-image:url(/img/background.jpg);" data-v-0539f1bd><div data-v-39c72c19 data-v-0539f1bd><nav class="navbar" data-v-39c72c19><div class="container" data-v-39c72c19><a href="/" class="router-link-active" data-v-39c72c19><span class="navbar-site-name" data-v-39c72c19>
+          一个懒癌程序员
+        </span></a> <div class="navbar-toggler" data-v-39c72c19><svg class="icon" style="fill:null;font-size:1.2em;" data-v-39c72c19 data-v-39c72c19><title data-v-39c72c19 data-v-39c72c19>menu</title><use xlink:href="#icon-menu" data-v-39c72c19 data-v-39c72c19></use></svg></div> <div class="navbar-links" data-v-39c72c19><a href="/" class="navbar-link" data-v-39c72c19>
+            首页
+          </a><a href="/posts/" class="navbar-link router-link-active" data-v-39c72c19>
+            文章
+          </a><a href="/life/" class="navbar-link" data-v-39c72c19>
+            生活
+          </a><a href="https://github.com/zhangzippo" target="_blank" rel="noopener noreferrer" class="navbar-link" data-v-39c72c19>
+            github
+          </a></div></div></nav> <div class="navbar-holder" style="display:none;" data-v-39c72c19></div></div> <div class="banner" data-v-98d6aa8c data-v-0539f1bd data-v-0539f1bd><div class="container" data-v-98d6aa8c><div class="center" data-v-98d6aa8c><h1 data-v-98d6aa8c data-v-0539f1bd>
+          webpack4 + vue多页面项目精细构建思路
+        </h1></div></div></div></header> <div class="container clearfix show-aside" data-v-6cd81e6a data-v-6cd81e6a><main class="main" data-v-6cd81e6a><div class="post" data-v-6cd81e6a data-v-6cd81e6a><section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><span class="create-date" data-v-4e23451f>
+      发布时间 : 2019-05-12
+    </span> <span class="update-date" data-v-4e23451f>
+      最后修改 : 2019-06-08
+    </span></section> <section class="post-links" data-v-4e23451f><a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html" class="post-link" data-v-4e23451f>
+      上一篇 : 理解BFC
+    </a> <a href="/posts/2019/06/08/_08customecli.html" class="post-link" data-v-4e23451f>
+      下一篇 : 写一个基于webpack的cli
+    </a></section></section> <article class="main-div"><div class="content default"><h1 id="webpack4-vue多页面项目精细构建思路"><a href="#webpack4-vue多页面项目精细构建思路" aria-hidden="true" class="header-anchor">#</a> webpack4 + vue多页面项目精细构建思路</h1> <p>虽然当前前端项目多以单页面为主，但多页面也并非一无是处，在一些情况下也是有用武之地的，比如：</p> <ol><li>项目庞大，各个业务模块需要解耦</li> <li>SEO更容易优化</li> <li>没有复杂的状态管理问题</li> <li>可以实现页面单独上线</li></ol> <h2 id="前言"><a href="#前言" aria-hidden="true" class="header-anchor">#</a> 前言</h2> <p>这里就第4点做一些解释，也对多页面的应用场景做一个我认为有价值的思路，在组内的一个项目中，因为项目日益膨胀，拆分系统有一定困难，项目页面达到200+个以上， 因此构建速度十分缓慢，部署时间也很长，经常因为文案的更改及一些简单的bug修复就要进行重新构建，如果采用单页面一方面构建部署时间会随着体量增大，另一方面在工程上不好进行拆分。这时候多页面就存在一种优势，我们可以在前端做一个空框架只包含菜单，内容区域采用多页面结构，当我们部署上线时可以只针对单个页面进行上线，速度大幅度提升（单页面内部可以集成前端路由），这样业务模块间也可平滑解耦。</p> <h2 id="项目架构"><a href="#项目架构" aria-hidden="true" class="header-anchor">#</a> 项目架构</h2> <p>vue +  typescript + webpack4
+vue项目，并没有使用vue-cli，原因是对于开发人员来说，了解构建的详细流程很重要，vue-cli这类工具的目的是快速实现项目的搭建，让开发人员快速接手，快速进入 业务代码编写，因此隐含的为我们做了很多事，很多构建及本地开发的优化等等，但对于开发人员来说了解每个步骤，每个细节是做什么的对自身成长很有帮助（尤其是组里的很多程序员都不爱使用高度封装的东西）。</p> <h2 id="思路"><a href="#思路" aria-hidden="true" class="header-anchor">#</a> 思路</h2> <p>对于多页面来说，与单页面对比无非就是以下几个问题：</p> <blockquote><ol><li>entry入口文件为多个，需要考虑页面多需要自动生成，少的话提前预置几个就可以。</li> <li>htmlWebpackPlugin使用时也需要相应的添加多个。</li> <li>公共静态资源提取的问题，splitchunkplugin是否需要使用的问题。</li> <li>最后就是支持项目的部分构建的功能实现</li></ol></blockquote> <p>为达到我们的终极目标，也就是能够部分代码进行构建，我们将一个项目从业务角度进行一个划分，两个层级，模块和页面，模块代表一个具体业务场景，页面代表这个业务场景的各个页面，我们将支持进行单/多模块和单/多页面的打包。</p> <h2 id="开始"><a href="#开始" aria-hidden="true" class="header-anchor">#</a> 开始</h2> <p>首先先看一下我们的项目目录结构</p> <div class="language- extra-class"><pre class="language-text"><code>├── build_tasks  // 构建脚本
+├── config  // 配置文件
+├── src  // 源码路径
+└── static  //build后文件路径
+src目录：
+src
+├── global.js  // 项目全局工具
+├── modules  // 模块
+│   ├── Layout.vue 
+│   ├── moduleA  // 具体模块名
+│   │   └── pageA // 具体页面名称
+│   │       ├── xx.js
+│   │       ├── index.vue
+</code></pre></div><h4 id="自动生成entry"><a href="#自动生成entry" aria-hidden="true" class="header-anchor">#</a> 自动生成entry</h4> <p>由于我们的页面非常之多，因此我们肯定是需要自动生成entry文件的，并且这一步是需要在进入webpack构建流程之前就要做好的。我们创建一个build_entries.ts的文件，用于编写创建entry流程,这里放一些核心代码</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code>
+<span class="token keyword">const</span> <span class="token function-variable function">getTemplate</span> <span class="token operator">=</span> pagePath <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>
+  <span class="token template-string"><span class="token string">`
+import App from '</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>pagePath<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">';
+import Vue from 'vue';
+  new Vue({
+  render: function (h) {
+  return h(App);
+}
+}).$mount('#app');`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> scriptReg <span class="token operator">=</span> <span class="token regex">/&lt;script([\s\S]*?)&gt;/</span><span class="token punctuation">;</span>
+<span class="token comment">/**
+ * 判断文件应该采用的后缀
+ */</span>
+<span class="token keyword">const</span> getSuffix <span class="token operator">=</span> <span class="token punctuation">(</span>source<span class="token punctuation">:</span> string<span class="token punctuation">)</span><span class="token punctuation">:</span> string <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> matchArr <span class="token operator">=</span> source<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span>scriptReg<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span>matchArr<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'ts'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token string">'.ts'</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> <span class="token string">'.js'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token function-variable function">generateEntries</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> entries <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token comment">/***一些前置代码拿到pages*/</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>pages<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token keyword">return</span> entries<span class="token punctuation">;</span>
+  <span class="token comment">// 清除entries</span>
+  rimraf<span class="token punctuation">.</span><span class="token function">sync</span><span class="token punctuation">(</span>entryPath<span class="token operator">+</span><span class="token string">'/*.*'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  pages<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span>page <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> relativePage <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">relative</span><span class="token punctuation">(</span>vueRoot<span class="token punctuation">,</span> page<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> source <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">readFileSync</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> <span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> suffix <span class="token operator">=</span> <span class="token function">getSuffix</span><span class="token punctuation">(</span>source<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> pageEntry <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>entryPath<span class="token punctuation">,</span> relativePage<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token regex">/\/index\.vue$/</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token regex">/\//g</span><span class="token punctuation">,</span> <span class="token string">'.'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">+</span> suffix<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> entryName <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">basename</span><span class="token punctuation">(</span>pageEntry<span class="token punctuation">,</span> suffix<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    entries<span class="token punctuation">[</span>entryName<span class="token punctuation">]</span> <span class="token operator">=</span> pageEntry
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>fs<span class="token punctuation">.</span><span class="token function">existsSync</span><span class="token punctuation">(</span>pageEntry<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> pagePath <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>vueRoot<span class="token punctuation">,</span> relativePage<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> template <span class="token operator">=</span> <span class="token function">getTemplate</span><span class="token punctuation">(</span>pagePath<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    fs<span class="token punctuation">.</span><span class="token function">writeFileSync</span><span class="token punctuation">(</span>pageEntry<span class="token punctuation">,</span> template<span class="token punctuation">,</span> <span class="token string">'utf-8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> entries
+<span class="token punctuation">}</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">getEntriesInfos</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">=&gt;</span><span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">generateEntries</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div><p>大概解释下思路，我们规定项目目录结构为modules/xxmodle/xxpage,我们以命名为index.vue的页面为入口页面，为每个index.vue创建入口的js模版（getTemplete方法），生成的entry名称为&quot;模块名.页面名.js&quot;。因为项目内需要支持ts，因此我们还需要判断vue内的script标签的语言，以便创建ts格式的entry还是js格式的entry。
+我们的webpack配置：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">const</span> entries  <span class="token operator">=</span> <span class="token function">getEntriesInfos</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> common <span class="token operator">=</span> <span class="token punctuation">{</span>
+  entry<span class="token punctuation">:</span> entries<span class="token punctuation">,</span>
+  output<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    filename<span class="token punctuation">:</span> <span class="token template-string"><span class="token string">`[name]-[hash].bundle.js`</span></span><span class="token punctuation">,</span>
+    path<span class="token punctuation">:</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>rootPath<span class="token punctuation">,</span> <span class="token string">'static'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    publicPath<span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre></div><h4 id="公共文件提取"><a href="#公共文件提取" aria-hidden="true" class="header-anchor">#</a> 公共文件提取</h4> <p>因为我们是多页面，每个页面都需要加载核心的包（如vue,element-ui,lodash等等）而这类包我们是不常变化的，因此我们需要使用webpack的dllplugin来剥离他们出来，不参与构建，我们的项目中也可能会有我们自己的全局工具包，这部分代码不适合提取，只需要在entry中再加入一个common的entry即可。对于单页面内是否需要使用splitchunk，在我的实践中是没有使用的，但是这个看情况，如果页面引用的包确实比较大（毕竟vue这类框架包已经被提取出去了，这个概率不大）那么可以使用splitchunk来分离，我目前的实践是合并到一个页面的js内，单页面js在gzip后在200k以内都可忍受。
+下面放一下dll的配置
+webpack.dll.config.ts</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">const</span> commonLibs <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'vue'</span><span class="token punctuation">,</span><span class="token string">'element-ui'</span><span class="token punctuation">,</span><span class="token string">'moment'</span><span class="token punctuation">,</span> <span class="token string">'lodash'</span><span class="token punctuation">]</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token punctuation">{</span>
+  mode<span class="token punctuation">:</span> <span class="token string">'production'</span><span class="token punctuation">,</span>
+  entry<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    commonLibs
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  output<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    path<span class="token punctuation">:</span> path<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'dll_libs'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    filename<span class="token punctuation">:</span> <span class="token string">'dll.[name].[hash:8].min.js'</span><span class="token punctuation">,</span>
+    library<span class="token punctuation">:</span> <span class="token string">'[name]'</span><span class="token punctuation">,</span>
+    <span class="token comment">// publicPath: '/static/'</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token keyword">new</span> <span class="token class-name">CleanWebpackPlugin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token keyword">new</span> <span class="token class-name">webpack<span class="token punctuation">.</span>DllPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      context<span class="token punctuation">:</span> __dirname<span class="token punctuation">,</span>
+      path<span class="token punctuation">:</span> path<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'dll_libs/'</span><span class="token punctuation">,</span> <span class="token string">'[name]-manifest.json'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      name<span class="token punctuation">:</span> <span class="token string">'[name]'</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token keyword">new</span> <span class="token class-name">assetsWebpackPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      filename<span class="token punctuation">:</span> <span class="token string">'dll_assets.json'</span><span class="token punctuation">,</span>
+      path<span class="token punctuation">:</span> path<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span><span class="token string">'assets/'</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span> <span class="token keyword">as</span> webpack<span class="token punctuation">.</span>Configuration<span class="token punctuation">;</span>
+</code></pre></div><p>如代码所示我们将'vue','element-ui','moment', 'lodash'这几个组件提取打成一个公共包命名为commonLib，这里使用了assetsWebpackPlugin用于生成一个json文件，记录每次dll构建的文件名（因为每次构建hash是不一样的），为的是在使用webpackhtmlplugin的时候拿到这个结果注入到模版页面中去。
+生成的json记录类似：</p> <div class="language- extra-class"><pre class="language-text"><code>{&quot;commonLibs&quot;:{&quot;js&quot;:&quot;dll.commonLibs.51be3e86.min.js&quot;}}
+</code></pre></div><p>这样我们就可以在webpack配置文件中取到这个名字：</p> <div class="language- extra-class"><pre class="language-text"><code>const dllJson = require('./assets/dll_assets.json');
+for(let entryKey in entries){
+  if(entryKey!== 'global'){
+    common.plugins.push(
+      new HtmlWebpackPlugin({
+        title: allConfiguration[entryKey].title,
+        isDebug: process.env.DEBUG,
+        filename: `${entryKey}.html`,
+        template: 'index.html',
+        chunks:['global', entryKey, ],
+        chunksSortMode: 'manual',
+        dll_common_assets: process.env.NODE_ENV !== 'production'?'./dll_libs/' + dllJson.commonLibs.js : publicPath + 'dll_libs/' + dllJson.commonLibs.js,
+      }),
+    )
+  }
+}
+</code></pre></div><p>因为是多页面，因此我们webpackhtml使用时也是要添加多个的，这里根据生成的json拿到dll的文件名注入到模版页面中。</p> <h4 id="按需打包"><a href="#按需打包" aria-hidden="true" class="header-anchor">#</a> 按需打包</h4> <p>接下来我们要支持进行按需构建打包，支持单/多模块以及单/多页面的打包，这里怎么做呢，可以在构建时传入环境变量，然后在build_entry中判断环境变量进行局部打包，因为打包的入口是entry的数量决定的。
+命令可以这样构成：</p> <div class="language- extra-class"><pre class="language-text"><code> MODULES=xxx,xxx PAGES=sss,sss npm run build
+</code></pre></div><p>build_entry相关代码,在generateEntries方法中</p> <div class="language- extra-class"><pre class="language-text"><code>const entries = {};
+  const buildModules = process.env.MODULES || '*';
+  const buildPages = process.env.PAGES || '*';
+  const filePaths = `${!buildModules.includes(',') ? buildModules : '{'+buildModules+'}'}/${!buildPages.includes(',') ? buildPages : '{'+buildPages+'}'}/*.vue`
+  const pages = glob.sync(path.resolve(vueRoot, filePaths)).filter(file =&gt;{
+    return /index\.vue$/.test(file) || [];
+  })
+  if (!pages.length) return entries;
+</code></pre></div><p>上面的方法根据传入的环境变量拼对应的页面及模块路径，通过glob的支持生成对应的entyr进行构建。</p> <h4 id="多页面线上发布"><a href="#多页面线上发布" aria-hidden="true" class="header-anchor">#</a> 多页面线上发布</h4> <p>多页面构建完成之后就是发布流程，发布流程其实也会变的简单，如果是单页面每次构建完成都要整体替换静态文件（js,css）,多页面模式下，我们只需要替换对应页面的文件即可，一般的思路是页面文件可以上传到部署的服务器，然后静态js，css等文件直接扔到CDN上即可，发布不会影响到其他页面，即便出错也不会影响项目，而且效率极高，这部分代码就不展示了，只是提供思路，毕竟每个项目发布流程都不太一样。</p> <h2 id="总结"><a href="#总结" aria-hidden="true" class="header-anchor">#</a> 总结</h2> <p>以上是我对多页面应用场景的一个思路，它是有一定的适用场景的，比较适合大而全而且模块划分清晰的系统。</p></div></article> <section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><span class="create-date" data-v-4e23451f>
+      发布时间 : 2019-05-12
+    </span> <span class="update-date" data-v-4e23451f>
+      最后修改 : 2019-06-08
+    </span></section> <section class="post-links" data-v-4e23451f><a href="/posts/2019/04/28/_28%E7%90%86%E8%A7%A3bfc.html" class="post-link" data-v-4e23451f>
+      上一篇 : 理解BFC
+    </a> <a href="/posts/2019/06/08/_08customecli.html" class="post-link" data-v-4e23451f>
+      下一篇 : 写一个基于webpack的cli
+    </a></section></section> <div id="post-comments" class="main-div"><!----></div></div></main> <aside class="aside" data-v-6cd81e6a><div class="info-card main-div" data-v-3da8ff8d data-v-6cd81e6a><div class="info-card-header" style="background-image:null;" data-v-3da8ff8d><img src="/img/avatar.jpeg" alt="zippo" class="info-avatar" data-v-3da8ff8d></div> <div class="info-card-body" data-v-3da8ff8d><section class="info-nickname" data-v-3da8ff8d>
+      zippo
+    </section> <section class="info-desc" data-v-3da8ff8d>the more you want<br/>the less you got</section> <section class="info-contact" data-v-3da8ff8d><section data-v-3da8ff8d><span title="beijing City, China" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>beijing City, China</title><use xlink:href="#icon-location" data-v-3da8ff8d data-v-3da8ff8d></use></svg><span class="info-text" data-v-3da8ff8d data-v-3da8ff8d>
+          beijing City, China
+        </span></span></section> <!----> <section data-v-3da8ff8d><a href="mailto:zhangzhp3@163.com" title="zhangzhp3@163.com" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>zhangzhp3@163.com</title><use xlink:href="#icon-email" data-v-3da8ff8d data-v-3da8ff8d></use></svg><span class="info-text" data-v-3da8ff8d data-v-3da8ff8d>
+          zhangzhp3@163.com
+        </span></a></section></section></div> <div class="info-card-footer" data-v-3da8ff8d><section class="info-sns clearfix" data-v-3da8ff8d><a href="https://github.com/zhangZippo" target="_blank" class="sns-link" data-v-3da8ff8d><span title="GitHub: meteorlxy" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>GitHub: meteorlxy</title><use xlink:href="#icon-github" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a><a href="https://www.zhihu.com/people/kevin-51-3/activities" target="_blank" class="sns-link" data-v-3da8ff8d><span title="知乎: zippo" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>知乎: zippo</title><use xlink:href="#icon-zhihu" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a><a href="https://www.jianshu.com/u/2c78bea25c85" target="_blank" class="sns-link" data-v-3da8ff8d><span title="新浪微博: zippo" class="sns-icon" data-v-3da8ff8d data-v-3da8ff8d><svg class="icon" style="fill:null;font-size:1.5em;" data-v-3da8ff8d data-v-3da8ff8d><title data-v-3da8ff8d data-v-3da8ff8d>新浪微博: zippo</title><use xlink:href="#icon-weibo" data-v-3da8ff8d data-v-3da8ff8d></use></svg></span></a></section></div></div> <div class="post-nav-card main-div" style="position:relative;top:0;width:0px;" data-v-6cd81e6a><div class="post-nav-contents"><svg class="icon" style="fill:null;font-size:null;"><title>book</title><use xlink:href="#icon-book"></use></svg> <span>文章目录</span> <div class="post-nav-toc"> <ul><li><a href="/posts/2019/05/12/_10mutilpage.html#前言">前言</a> <!----></li><li><a href="/posts/2019/05/12/_10mutilpage.html#项目架构">项目架构</a> <!----></li><li><a href="/posts/2019/05/12/_10mutilpage.html#思路">思路</a> <!----></li><li><a href="/posts/2019/05/12/_10mutilpage.html#开始">开始</a> <!----></li><li><a href="/posts/2019/05/12/_10mutilpage.html#总结">总结</a> <!----></li></ul> </div></div> <div class="post-nav-comments"><svg class="icon" style="fill:null;font-size:null;"><title>comment</title><use xlink:href="#icon-comment"></use></svg> <a href="/posts/2019/05/12/_10mutilpage.html#post-comments">
+      评论
+    </a></div></div></aside></div> <footer class="footer" data-v-1114308c><p class="sns-links" data-v-1114308c><a href="https://github.com/zhangZippo" target="_blank" class="sns-link" data-v-1114308c><span title="GitHub: meteorlxy" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>GitHub: meteorlxy</title><use xlink:href="#icon-github" data-v-1114308c data-v-1114308c></use></svg></span></a><a href="https://www.zhihu.com/people/kevin-51-3/activities" target="_blank" class="sns-link" data-v-1114308c><span title="知乎: zippo" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>知乎: zippo</title><use xlink:href="#icon-zhihu" data-v-1114308c data-v-1114308c></use></svg></span></a><a href="https://www.jianshu.com/u/2c78bea25c85" target="_blank" class="sns-link" data-v-1114308c><span title="新浪微博: zippo" class="sns-icon" data-v-1114308c data-v-1114308c><svg class="icon" style="fill:null;font-size:25px;" data-v-1114308c data-v-1114308c><title data-v-1114308c data-v-1114308c>新浪微博: zippo</title><use xlink:href="#icon-weibo" data-v-1114308c data-v-1114308c></use></svg></span></a></p> <p data-v-1114308c><span data-v-1114308c>Powered by </span> <a href="https://vuepress.vuejs.org" target="_blank" data-v-1114308c>
+      Vuepress
+    </a></p></footer></div><div class="global-ui"><!----><!----></div></div>
+    <script src="/assets/js/app.7e97c462.js" defer></script><script src="/assets/js/3.e09623a1.js" defer></script><script src="/assets/js/19.d97c7382.js" defer></script>
+  </body>
+</html>
